@@ -70,11 +70,13 @@ public class ItemFramePlayer {
                 throw new VideoReadException("Unable to read video");
             } else {
                 this.mapWrappers = new MapWrapper[decoder.getFrameCount() / 4];
+                int next = 0;
                 for (int i = 0; i < decoder.getFrameCount(); i++) {
                     BufferedImage bufferedImage = decoder.getNextFrame();
-                    if (i % 4 == 0 && this.mapWrappers.length > i) {
+                    if (i % 4 == 0 && this.mapWrappers.length > next) {
                         MapWrapper mapWrapper = mapManager.wrapImage(bufferedImage);
-                        this.mapWrappers[i] = mapWrapper;
+                        this.mapWrappers[next] = mapWrapper;
+                        next++;
                     }
                 }
                 decoder.close();
