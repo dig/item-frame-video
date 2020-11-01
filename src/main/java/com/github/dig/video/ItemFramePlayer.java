@@ -94,23 +94,24 @@ public class ItemFramePlayer {
     }
 
     public void addViewer(@NonNull Player player) {
+        log.log(Level.INFO, "addViewer 1");
         viewers.add(player);
+        log.log(Level.INFO, "mapWrappers.length = " + mapWrappers.length);
+        for (MapWrapper mapWrapper : mapWrappers) {
+            MapController mapController = mapWrapper.getController();
+            mapController.addViewer(player);
+            mapController.sendContent(player);
+        }
     }
 
     public void play() {
         if (isPlaying())
             throw new PlayerAlreadyPlayingException("Player already running");
 
-        for (MapWrapper mapWrapper : mapWrappers) {
-            MapController mapController = mapWrapper.getController();
-            viewers.forEach(mapController::addViewer);
-            viewers.forEach(mapController::sendContent);
-        }
-
-        long period = (long) Math.max((double) 20 / decoder.getFrameRate(), 5.0);
-        System.out.println("period = " + period);
-        runnable = new FrameRunnable(itemFrames, viewers, mapWrappers);
-        runnable.runTaskTimer(plugin, 1l, period);
+        long delay = (long) Math.max((double) 1000 / decoder.getFrameRate(), 16.6);
+        System.out.println("delay = " + delay);
+        runnable = new FrameRunnable(itemFrames, viewers, mapWrappers, delay * 4);
+        runnable.runTaskAsynchronously(plugin);
     }
 
     public boolean isPlaying() {

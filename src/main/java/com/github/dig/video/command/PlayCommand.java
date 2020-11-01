@@ -1,8 +1,10 @@
 package com.github.dig.video.command;
 
+import com.github.dig.video.BlackRenderer;
 import com.github.dig.video.Direction;
 import com.github.dig.video.ItemFramePlayer;
 import com.github.dig.video.exception.VideoReadException;
+import javafx.scene.control.cell.MapValueFactory;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import lombok.extern.java.Log;
@@ -20,6 +22,7 @@ import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.MapMeta;
+import org.bukkit.map.MapView;
 import org.bukkit.plugin.Plugin;
 
 import java.io.File;
@@ -111,6 +114,17 @@ public class PlayCommand implements CommandExecutor {
         ItemFrame[][] itemFrames = new ItemFrame[width][height];
         boolean useZ = direction == Direction.WEST || direction == Direction.EAST;
 
+        MapView mapView = Bukkit.createMap(topLeft.getWorld());
+        mapView.setScale(MapView.Scale.NORMAL);
+        mapView.setUnlimitedTracking(false);
+        mapView.getRenderers().clear();
+        // mapView.addRenderer(new BlackRenderer());
+
+        ItemStack item = new ItemStack(Material.FILLED_MAP, 1);
+        MapMeta mapMeta = (MapMeta) item.getItemMeta();
+        mapMeta.setMapView(mapView);
+        item.setItemMeta(mapMeta);
+
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 Location location = topLeft.getLocation().clone();
@@ -124,10 +138,7 @@ public class PlayCommand implements CommandExecutor {
                 ItemFrame frame = location.getWorld().spawn(
                         location,
                         ItemFrame.class);
-
-                ItemStack item = new ItemStack(Material.FILLED_MAP);
-                frame.setItem(item);
-
+                // frame.setItem(item);
                 itemFrames[x][height - (y + 1)] = frame;
             }
         }
