@@ -34,7 +34,7 @@ public class ItemFramePlayer {
 
     private final Plugin plugin;
     @Getter
-    private final ItemFrame itemFrame;
+    private final ItemFrame[][] itemFrames;
     @Getter
     private final File video;
 
@@ -45,11 +45,11 @@ public class ItemFramePlayer {
     private BukkitRunnable runnable;
 
     public ItemFramePlayer(@NonNull Plugin plugin,
-                           @NonNull ItemFrame itemFrame,
+                           @NonNull ItemFrame[][] itemFrames,
                            @NonNull File video)
             throws FileNotFoundException, UnsupportedOperationException, VideoReadException {
         this.plugin = plugin;
-        this.itemFrame = itemFrame;
+        this.itemFrames = itemFrames;
         this.video = video;
         this.viewers = new HashSet<>();
         init();
@@ -100,7 +100,7 @@ public class ItemFramePlayer {
             viewers.forEach(mapController::sendContent);
         }
 
-        runnable = new FrameRunnable(itemFrame, viewers, mapWrappers);
+        runnable = new FrameRunnable(itemFrames, viewers, mapWrappers);
         runnable.runTaskTimer(plugin, 20l, 20l);
     }
 
