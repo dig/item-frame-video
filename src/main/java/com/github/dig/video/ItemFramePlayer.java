@@ -12,6 +12,9 @@ import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
+import org.inventivetalent.mapmanager.controller.MapController;
+import org.inventivetalent.mapmanager.manager.MapManager;
+import org.inventivetalent.mapmanager.wrapper.MapWrapper;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -27,6 +30,8 @@ import java.util.logging.Level;
 @Log
 public class ItemFramePlayer {
 
+    private final MapManager mapManager = ItemFrameVideoPlugin.getInstance().getMapManager();
+
     private final Plugin plugin;
     @Getter
     private final ItemFrame itemFrame;
@@ -36,6 +41,7 @@ public class ItemFramePlayer {
     private final Set<Player> viewers;
 
     private Decoder decoder;
+    private MapWrapper[] mapWrappers;
     private BukkitRunnable runnable;
 
     public ItemFramePlayer(@NonNull Plugin plugin,
@@ -62,6 +68,16 @@ public class ItemFramePlayer {
 
             if (decoder != null && !decoder.read(new FileInputStream(video))) {
                 throw new VideoReadException("Unable to read video");
+            } else {
+                this.mapWrappers = new MapWrapper[decoder.getFrameCount() / 4];
+                for (int i = 0; i < decoder.getFrameCount(); i++) {
+                    BufferedImage bufferedImage = decoder.getNextFrame();
+                    if (i % 4 == 0 && this.mapWrappers.length > i) {
+                        MapWrapper mapWrapper = mapManager.wrapImage(bufferedImage);
+                        this.mapWrappers[i] = mapWrapper;
+                    }
+                }
+                decoder.close();
             }
         } else {
             throw new UnsupportedOperationException("Unsupported file type");
@@ -75,8 +91,15 @@ public class ItemFramePlayer {
     public void play() {
         if (isPlaying())
             throw new PlayerAlreadyPlayingException("Player already running");
-        runnable = new FrameRunnable(itemFrame, viewers, decoder);
-        runnable.runTaskTimer(plugin, 0l, 5l);
+
+        for (MapWrapper mapWrapper : mapWrappers) {
+            MapController mapController = mapWrapper.getController();
+            viewers.forEach(mapController::addViewer);
+            viewers.forEach(mapController::sendContent);
+        }
+
+        runnable = new FrameRunnable(itemFrame, viewers, mapWrappers);
+        runnable.runTaskTimer(plugin, 20l, 20l);
     }
 
     public boolean isPlaying() {

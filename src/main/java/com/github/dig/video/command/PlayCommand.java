@@ -40,15 +40,17 @@ public class PlayCommand implements CommandExecutor {
                     ItemFrame itemFrame = (ItemFrame) entity;
 
                     if (video != null && video.exists()) {
-                        try {
-                            ItemFramePlayer framePlayer = new ItemFramePlayer(plugin, itemFrame, video);
-                            Bukkit.getOnlinePlayers().forEach(framePlayer::addViewer);
-                            framePlayer.play();
-                        } catch (FileNotFoundException | VideoReadException e) {
-                            sender.sendMessage(ChatColor.RED + "Unable to start player.");
-                            log.log(Level.SEVERE, "Unable to start player", e);
-                        }
-
+                        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
+                            try {
+                                ItemFramePlayer framePlayer = new ItemFramePlayer(plugin, itemFrame, video);
+                                Bukkit.getOnlinePlayers().forEach(framePlayer::addViewer);
+                                Bukkit.getScheduler().runTask(plugin, () -> framePlayer.play());
+                            } catch (FileNotFoundException | VideoReadException e) {
+                                Bukkit.getScheduler().runTask(plugin,
+                                        () -> sender.sendMessage(ChatColor.RED + "Unable to start player."));
+                                log.log(Level.SEVERE, "Unable to start player", e);
+                            }
+                        });
                     } else {
                         sender.sendMessage(ChatColor.RED + "File does not exist.");
                     }
