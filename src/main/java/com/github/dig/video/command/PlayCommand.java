@@ -1,5 +1,6 @@
 package com.github.dig.video.command;
 
+import com.github.dig.video.Direction;
 import com.github.dig.video.ItemFramePlayer;
 import com.github.dig.video.exception.VideoReadException;
 import lombok.AllArgsConstructor;
@@ -48,16 +49,37 @@ public class PlayCommand implements CommandExecutor {
 
                 File video = new File(plugin.getDataFolder(), args[2]);
                 if (video != null && video.exists()) {
-                    Block topLeft = player.getTargetBlockExact(1);
+                    Block topLeft = player.getTargetBlockExact(5);
                     if (topLeft != null && topLeft.getType() != Material.AIR) {
-                        boolean useZ = true;
-                        double yaw = player.getLocation().getYaw();
-                        if ((yaw >= 135 || yaw <= -135)
-                                || (yaw <= 45 || yaw <= -45)) {
-                            useZ = false;
+                        Direction direction = Direction.getDirection(player.getLocation());
+                        switch (direction) {
+                            case NORTH:
+                                topLeft = topLeft.getLocation()
+                                        .clone()
+                                        .add(0, 0, 1)
+                                        .getBlock();
+                                break;
+                            case EAST:
+                                topLeft = topLeft.getLocation()
+                                        .clone()
+                                        .subtract(1, 0, 0)
+                                        .getBlock();
+                                break;
+                            case SOUTH:
+                                topLeft = topLeft.getLocation()
+                                        .clone()
+                                        .subtract(0, 0, 1)
+                                        .getBlock();
+                                break;
+                            case WEST:
+                                topLeft = topLeft.getLocation()
+                                        .clone()
+                                        .add(1, 0, 0)
+                                        .getBlock();
+                                break;
                         }
 
-                        ItemFrame[][] itemFrames = createItemFrames(topLeft, width, height, useZ);
+                        ItemFrame[][] itemFrames = createItemFrames(topLeft, width, height, direction);
                         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
                             try {
                                 ItemFramePlayer framePlayer = new ItemFramePlayer(plugin, itemFrames, video);
@@ -80,17 +102,30 @@ public class PlayCommand implements CommandExecutor {
         return true;
     }
 
-    private ItemFrame[][] createItemFrames(@NonNull Block topLeft, int width, int height, boolean useZ) {
+    private ItemFrame[][] createItemFrames(@NonNull Block topLeft,
+                                           int width,
+                                           int height,
+                                           @NonNull Direction direction) {
         ItemFrame[][] itemFrames = new ItemFrame[width][height];
-        for (int x = 0; x < width; x++) {
-            for (int y = 0; y < height; y++) {
-                Location location = topLeft.getLocation().clone().add(useZ ? 0 : x, y, useZ ? x : 0);
+        boolean useZ = direction == Direction.WEST || direction == Direction.EAST;
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                Location location = topLeft.getLocation().clone();
+
+                if (direction == Direction.SOUTH || direction == Direction.WEST) {
+                    location.subtract(useZ ? 0 : x, y, useZ ? x : 0);
+                } else {
+                    location.add(useZ ? 0 : x, -y, useZ ? x : 0);
+                }
+
                 ItemFrame frame = location.getWorld().spawn(
                         location,
                         ItemFrame.class);
                 itemFrames[x][y] = frame;
             }
         }
+
         return itemFrames;
     }
 

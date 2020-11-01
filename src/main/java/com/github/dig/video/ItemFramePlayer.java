@@ -17,6 +17,7 @@ import org.inventivetalent.mapmanager.manager.MapManager;
 import org.inventivetalent.mapmanager.wrapper.MapWrapper;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -39,6 +40,8 @@ public class ItemFramePlayer {
     private final File video;
 
     private final Set<Player> viewers;
+    private final int width;
+    private final int height;
 
     private Decoder decoder;
     private MapWrapper[] mapWrappers;
@@ -52,6 +55,8 @@ public class ItemFramePlayer {
         this.itemFrames = itemFrames;
         this.video = video;
         this.viewers = new HashSet<>();
+        this.width = itemFrames.length;
+        this.height = itemFrames[0].length;
         init();
     }
 
@@ -74,7 +79,9 @@ public class ItemFramePlayer {
                 for (int i = 0; i < decoder.getFrameCount(); i++) {
                     BufferedImage bufferedImage = decoder.getNextFrame();
                     if (i % 4 == 0 && this.mapWrappers.length > next) {
-                        MapWrapper mapWrapper = mapManager.wrapImage(bufferedImage);
+                        bufferedImage = scaleImage(bufferedImage);
+                        MapWrapper mapWrapper = mapManager.wrapMultiImage(bufferedImage,
+                                height, width);
                         this.mapWrappers[next] = mapWrapper;
                         next++;
                     }
@@ -108,10 +115,23 @@ public class ItemFramePlayer {
         return runnable != null && !runnable.isCancelled();
     }
 
-    private Optional<String> getExtension(String fileName) {
+    private Optional<String> getExtension(@NonNull String fileName) {
         return Optional.ofNullable(fileName)
                 .filter(f -> f.contains("."))
                 .map(f -> f.substring(fileName.lastIndexOf(".") + 1));
+    }
+
+    private BufferedImage scaleImage(@NonNull BufferedImage original) {
+        int type = original.getType();
+        BufferedImage scaledImage = new BufferedImage(128 * this.width, 128 * this.height, type);
+        Graphics scaledGraphics = scaledImage.getGraphics();
+
+        Image instance = original.getScaledInstance(128 * this.width, 128 * this.height, Image.SCALE_FAST);
+        scaledGraphics.drawImage(instance, 0, 0, null);
+
+        instance.flush();
+        scaledGraphics.dispose();
+        return scaledImage;
     }
 
     private void save(@NonNull String fileName, @NonNull BufferedImage frame) {
