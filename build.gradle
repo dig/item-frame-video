@@ -1,0 +1,23 @@
+plugins {
+    id 'com.github.johnrengelman.shadow' version '6.0.0'
+    id 'java'
+}
+
+group 'com.github.dig.video'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+    maven { url = 'https://hub.spigotmc.org/nexus/content/groups/public/' }
+    maven { url = 'https://repo.inventivetalent.org/content/groups/public/' }
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    annotationProcessor 'org.projectlombok:lombok:1.18.8'
+    compile 'com.github.sealedtx:java-youtube-downloader:2.4.2'
+    compileOnly 'org.projectlombok:lombok:1.18.8'
+    compileOnly 'org.spigotmc:spigot-api:1.16.1-R0.1-SNAPSHOT'
+    compileOnly 'org.inventivetalent:mapmanager:1.7.9-SNAPSHOT'
+}

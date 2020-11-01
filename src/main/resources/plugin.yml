@@ -1,0 +1,8 @@
+name: ItemFrameVideo
+version: 1.0
+main: com.github.dig.video.ItemFrameVideoPlugin
+author: Digital
+api-version: 1.16
+depend:
+  - MapManager
+  - PacketListenerAPI
