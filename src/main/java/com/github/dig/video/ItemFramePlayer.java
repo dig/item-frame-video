@@ -108,7 +108,7 @@ public class ItemFramePlayer {
         }
 
         runnable = new FrameRunnable(itemFrames, viewers, mapWrappers);
-        runnable.runTaskTimer(plugin, 20l, 20l);
+        runnable.runTaskTimer(plugin, 1l, 5l);
     }
 
     public boolean isPlaying() {

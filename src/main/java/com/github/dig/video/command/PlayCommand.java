@@ -18,6 +18,8 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.MapMeta;
 import org.bukkit.plugin.Plugin;
 
 import java.io.File;
@@ -122,7 +124,10 @@ public class PlayCommand implements CommandExecutor {
                 ItemFrame frame = location.getWorld().spawn(
                         location,
                         ItemFrame.class);
-                itemFrames[x][y] = frame;
+
+                ItemStack map2 = new ItemStack(Material.FILLED_MAP);
+                frame.setItem(map2);
+                itemFrames[x][height - (y + 1)] = frame;
             }
         }
 
