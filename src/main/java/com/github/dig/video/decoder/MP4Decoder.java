@@ -44,7 +44,7 @@ public class MP4Decoder implements Decoder {
         return frames;
     }
 
-    public BufferedImage toBufferedImage(@NonNull Frame frame) {
+    private BufferedImage toBufferedImage(@NonNull Frame frame) {
         Java2DFrameConverter bimConverter = new Java2DFrameConverter();
         BufferedImage img = bimConverter.convert(frame);
         BufferedImage result = (BufferedImage) img.getScaledInstance(

@@ -2,33 +2,44 @@ package com.github.dig.video;
 
 import com.github.dig.video.decoder.Decoder;
 import com.github.dig.video.decoder.MP4Decoder;
+import com.github.dig.video.exception.PlayerAlreadyPlayingException;
 import com.github.dig.video.exception.VideoReadException;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NonNull;
 import org.bukkit.entity.ItemFrame;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 public class ItemFramePlayer {
 
+    private final Plugin plugin;
     @Getter
     private final ItemFrame itemFrame;
     @Getter
     private final File video;
 
+    private final Set<Player> viewers;
+
     private Decoder decoder;
     private BukkitRunnable runnable;
 
-    public ItemFramePlayer(@NonNull ItemFrame itemFrame,
+    public ItemFramePlayer(@NonNull Plugin plugin,
+                           @NonNull ItemFrame itemFrame,
                            @NonNull File video)
             throws FileNotFoundException, UnsupportedOperationException, VideoReadException {
+        this.plugin = plugin;
         this.itemFrame = itemFrame;
         this.video = video;
+        this.viewers = new HashSet<>();
         init();
     }
 
@@ -51,8 +62,16 @@ public class ItemFramePlayer {
         }
     }
 
+    public void addViewer(@NonNull Player player) {
+        viewers.add(player);
+    }
+
     public void play() {
-        runnable = new FrameRunnable();
+        if (isPlaying())
+            throw new PlayerAlreadyPlayingException("Player already running");
+
+        runnable = new FrameRunnable(itemFrame, viewers, decoder.getFrames());
+        runnable.runTaskTimer(plugin, 0l, 5l);
     }
 
     public boolean isPlaying() {
