@@ -125,8 +125,9 @@ public class PlayCommand implements CommandExecutor {
                         location,
                         ItemFrame.class);
 
-                ItemStack map2 = new ItemStack(Material.FILLED_MAP);
-                frame.setItem(map2);
+                ItemStack item = new ItemStack(Material.FILLED_MAP);
+                frame.setItem(item);
+
                 itemFrames[x][height - (y + 1)] = frame;
             }
         }

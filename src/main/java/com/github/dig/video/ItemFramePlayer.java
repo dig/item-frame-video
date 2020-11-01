@@ -107,8 +107,10 @@ public class ItemFramePlayer {
             viewers.forEach(mapController::sendContent);
         }
 
+        long period = (long) Math.max((double) 20 / decoder.getFrameRate(), 5.0);
+        System.out.println("period = " + period);
         runnable = new FrameRunnable(itemFrames, viewers, mapWrappers);
-        runnable.runTaskTimer(plugin, 1l, 5l);
+        runnable.runTaskTimer(plugin, 1l, period);
     }
 
     public boolean isPlaying() {

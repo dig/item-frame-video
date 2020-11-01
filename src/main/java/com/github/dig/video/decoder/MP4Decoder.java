@@ -52,6 +52,11 @@ public class MP4Decoder implements Decoder {
     }
 
     @Override
+    public double getFrameRate() {
+        return video.getFrameRate();
+    }
+
+    @Override
     public void close() {
         try {
             video.stop();

@@ -11,6 +11,8 @@ public interface Decoder {
 
     BufferedImage getNextFrame();
 
+    double getFrameRate();
+
     void close();
 
 }
