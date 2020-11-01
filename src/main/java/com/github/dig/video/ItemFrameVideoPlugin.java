@@ -1,5 +1,6 @@
 package com.github.dig.video;
 
+import com.github.dig.video.command.PlayCommand;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.PluginManager;
@@ -28,6 +29,9 @@ public class ItemFrameVideoPlugin extends JavaPlugin {
         } else {
             System.out.println("[ItemFrameVideo] Unable to find MapManager, disabling...");
             pluginManager.disablePlugin(this);
+            return;
         }
+
+        getCommand("play").setExecutor(new PlayCommand(this));
     }
 }

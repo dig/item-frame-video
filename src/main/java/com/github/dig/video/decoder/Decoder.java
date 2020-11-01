@@ -9,8 +9,8 @@ public interface Decoder {
 
     int getFrameCount();
 
-    BufferedImage getFrame(int frame);
+    BufferedImage getNextFrame();
 
-    BufferedImage[] getFrames();
+    void close();
 
 }
